@@ -5,30 +5,54 @@ import "./App.css";
 function App() {
   const [advices, setAdvices] = useState([]);
   const [loadAdvice, setLoadAdvice] = useState(false);
-  const [numberOfAdvices, setNumberOfAdvices] = useState(0);
-  const [advicesIndex, setAdvicesIndex] = useState(-1);
+  const [advicesIndex, setAdvicesIndex] = useState(0);
   const [error, setError] = useState("");
+  const advicesLimit = 5;
 
   const fetchAdvice = () => {
-    if (numberOfAdvices < 5) {
+    if (advices.length < 5) {
       setLoadAdvice(true);
       axios
         .get("https://api.adviceslip.com/advice")
         .then((response) => {
           const { advice } = response.data.slip;
-          setAdvices([...advices, advice]);
-          setNumberOfAdvices(numberOfAdvices + 1);
-          setAdvicesIndex(advicesIndex + 1);
           setLoadAdvice(false);
-          console.log(advices[advicesIndex]);
+          setAdvices([...advices, advice]);
+          setAdvicesIndex(advicesIndex + 1);
+          console.log(advices);
         })
         .catch((error) => {
           console.log(error);
           setError("ERROR! Try again later...");
         });
     } else {
-      setAdvices(["You have reached your limit. Come back tomorrow!"]);
-      setAdvicesIndex(0);
+      setError(["You have reached your limit. Come back tomorrow!"]);
+    }
+  };
+
+  const hideError = () => {
+    if (error !== "") {
+      setTimeout(() => {
+        setError("");
+      }, 2000);
+    }
+  };
+
+  const previousAdvice = () => {
+    if (advices.length < 6) {
+      setAdvicesIndex(advicesIndex - 1);
+    }
+    if (advicesIndex <= 1) {
+      setAdvicesIndex(1);
+    }
+  };
+
+  const nextAdvice = () => {
+    if (advicesIndex < advices.length) {
+      setAdvicesIndex(advicesIndex + 1);
+    }
+    if (advicesIndex > advices.length) {
+      setAdvicesIndex(advices.length);
     }
   };
 
@@ -36,27 +60,41 @@ function App() {
     fetchAdvice();
   }, []);
 
+  useEffect(() => {
+    hideError();
+  }, [error]);
+
   return (
     <div className="app">
-      <p className={numberOfAdvices < 5 ? "indicator" : "indicator limits"}>
-        {numberOfAdvices} / 5
+      <div className="card-header">
+      <p className={"indicator"}>Limited to {advicesLimit}</p>
+      <p className={"indicator"}>
+        {advicesIndex} / {advices.length}
       </p>
-      <div className={numberOfAdvices < 6 ? "card" : "card limits"}>
-        <h1 className="header">
-          {loadAdvice ? "thinking ..." : advices[advicesIndex]}
-        </h1>
       </div>
+      <div className={"card"}>
+        <h1 className="header">
+          {loadAdvice ? "thinking ..." : advices[advicesIndex - 1]}
+        </h1>
+        <button className="prev-btn" onClick={previousAdvice}>
+          {"<"}
+        </button>
+        <button className="next-btn" onClick={nextAdvice}>
+          {">"}
+        </button>
+      </div>
+
       <div className="buttons">
         <button
-          className={numberOfAdvices < 5 ? "button" : "button limits"}
+          className={advices.length < advicesLimit ? "button" : "button limits"}
           onClick={fetchAdvice}
         >
           <span>
-            {numberOfAdvices < 5 ? "I need advice" : "No more advice"}
+            {advices.length < advicesLimit ? "I need advice" : "No more advice"}
           </span>
         </button>
         <button className="button save">
-          <span>Save this</span>
+          <span>Save to notion</span>
         </button>
       </div>
       {error && <p className="error">{error}</p>}
