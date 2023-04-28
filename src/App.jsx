@@ -16,10 +16,9 @@ function App() {
         .get("https://api.adviceslip.com/advice")
         .then((response) => {
           const { advice } = response.data.slip;
-          setLoadAdvice(false);
           setAdvices([...advices, advice]);
           setAdvicesIndex(advicesIndex + 1);
-          console.log(advices);
+          setLoadAdvice(false);
         })
         .catch((error) => {
           console.log(error);
@@ -56,21 +55,29 @@ function App() {
     }
   };
 
-  useEffect(() => {
-    fetchAdvice();
-  }, []);
+  useEffect(
+    () => fetchAdvice(),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
 
-  useEffect(() => {
-    hideError();
-  }, [error]);
+  useEffect(
+    () => hideError(),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [error]
+  );
+
+  const handleClick = () => {
+    fetchAdvice();
+  };
 
   return (
     <div className="app">
       <div className="card-header">
-      <p className={"indicator"}>Limited to {advicesLimit}</p>
-      <p className={"indicator"}>
-        {advicesIndex} / {advices.length}
-      </p>
+        <p className={"indicator"}>Limited to {advicesLimit}</p>
+        <p className={"indicator"}>
+          {advicesIndex} / {advices.length}
+        </p>
       </div>
       <div className={"card"}>
         <h1 className="header">
@@ -87,7 +94,7 @@ function App() {
       <div className="buttons">
         <button
           className={advices.length < advicesLimit ? "button" : "button limits"}
-          onClick={fetchAdvice}
+          onClick={handleClick}
         >
           <span>
             {advices.length < advicesLimit ? "I need advice" : "No more advice"}
