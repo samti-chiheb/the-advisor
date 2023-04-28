@@ -4,6 +4,7 @@ import "./App.css";
 
 function App() {
   const [advices, setAdvices] = useState([]);
+  const [advicesId, setAdvicesId] = useState([]);
   const [loadAdvice, setLoadAdvice] = useState(false);
   const [advicesIndex, setAdvicesIndex] = useState(0);
   const [error, setError] = useState("");
@@ -11,14 +12,15 @@ function App() {
 
   const fetchAdvice = () => {
     if (advices.length < 5) {
-      setLoadAdvice(true);
       axios
         .get("https://api.adviceslip.com/advice")
         .then((response) => {
-          const { advice } = response.data.slip;
+          const { advice, id } = response.data.slip;
+          setAdvicesId([...advicesId, id]);
           setAdvices([...advices, advice]);
-          setAdvicesIndex(advicesIndex + 1);
-          setLoadAdvice(false);
+          setAdvicesIndex(advices.length + 1);
+          console.log("fetch complet");
+          console.log(advices);
         })
         .catch((error) => {
           console.log(error);
@@ -68,7 +70,11 @@ function App() {
   );
 
   const handleClick = () => {
-    fetchAdvice();
+    setLoadAdvice(true)
+    setTimeout(() => {
+      fetchAdvice();
+      setLoadAdvice(false)
+    }, 1000);
   };
 
   return (
@@ -83,12 +89,18 @@ function App() {
         <h1 className="header">
           {loadAdvice ? "thinking ..." : advices[advicesIndex - 1]}
         </h1>
-        <button className="prev-btn" onClick={previousAdvice}>
-          {"<"}
-        </button>
-        <button className="next-btn" onClick={nextAdvice}>
-          {">"}
-        </button>
+        {/* prev btn */}
+        {advicesIndex < 2 || (
+          <button className="prev-btn" onClick={previousAdvice}>
+            {"<"}
+          </button>
+        )}
+        {/* next btn */}
+        {advices.length === advicesIndex || (
+          <button className="next-btn" onClick={nextAdvice}>
+            {">"}
+          </button>
+        )}
       </div>
 
       <div className="buttons">
