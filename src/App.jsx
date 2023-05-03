@@ -70,11 +70,13 @@ function App() {
   );
 
   const handleClick = () => {
-    setLoadAdvice(true)
+    setLoadAdvice(true);
     setTimeout(() => {
       fetchAdvice();
-      setLoadAdvice(false)
     }, 1000);
+    setTimeout(() => {
+      setLoadAdvice(false);
+    }, 1100);
   };
 
   return (
